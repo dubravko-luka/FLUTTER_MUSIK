@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:musik/src/ui/screens/album.dart';
 import 'package:musik/src/ui/screens/favourite.dart';
 import 'package:musik/src/ui/screens/home.dart';
 import 'package:musik/src/ui/screens/profile.dart';
 import 'package:musik/src/ui/screens/upload.dart';
+import 'package:musik/src/ui/widgets/music_player.dart';
+import 'package:musik/src/state/player_state.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   static const List<Widget> _pages = <Widget>[
     Home(),
     Favourite(),
-    Album(),
+    AlbumScreen(),
     Upload(),
     Profile(),
   ];
@@ -32,7 +35,32 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: Stack(
+        children: [
+          Consumer<PlayerState>(builder: (context, playerState, child) {
+            final bottom = playerState.isPlaying ? 150.0 : 0.0;
+            return Padding(padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, bottom), child: _pages[_selectedIndex]);
+          }),
+          Consumer<PlayerState>(
+            builder: (context, playerState, child) {
+              return playerState.isPlaying
+                  ? Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SizedBox(
+                            height: 140,
+                            child: MusicPlayer(),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container();
+            },
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
@@ -46,7 +74,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.album),
-            label: 'Album',
+            label: 'AlbumScreen',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.cloud_upload),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:musik/src/models/music_model.dart'; // Adjust import path as needed
+import 'package:provider/provider.dart';
+import 'package:musik/src/state/player_state.dart';
+import 'package:musik/src/models/music_model.dart';
 
 class MusicItem extends StatelessWidget {
   final Music music;
@@ -16,6 +18,9 @@ class MusicItem extends StatelessWidget {
         child: Container(
             color: Colors.white,
             child: ListTile(
+              onTap: () {
+                context.read<PlayerState>().play();
+              },
               contentPadding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 8.0),
               leading:
                   ClipRRect(borderRadius: BorderRadius.circular(5.0), child: Image.network(music.imageUrl, width: 50, height: 50, fit: BoxFit.cover)),
