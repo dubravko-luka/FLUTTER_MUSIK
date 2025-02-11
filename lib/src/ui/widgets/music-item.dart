@@ -19,7 +19,7 @@ class MusicItem extends StatelessWidget {
             color: Colors.white,
             child: ListTile(
               onTap: () {
-                context.read<PlayerState>().play();
+                context.read<PlayerState>().play(music.url);
               },
               contentPadding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 8.0),
               leading:

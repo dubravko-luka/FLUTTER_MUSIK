@@ -38,27 +38,23 @@ class _MainScreenState extends State<MainScreen> {
       body: Stack(
         children: [
           Consumer<PlayerState>(builder: (context, playerState, child) {
-            final bottom = playerState.isPlaying ? 150.0 : 0.0;
+            final bottom = playerState.isOpen ? 170.0 : 70.0;
             return Padding(padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, bottom), child: _pages[_selectedIndex]);
           }),
-          Consumer<PlayerState>(
-            builder: (context, playerState, child) {
-              return playerState.isPlaying
-                  ? Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SizedBox(
-                            height: 140,
-                            child: MusicPlayer(),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Container();
-            },
-          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Consumer<PlayerState>(builder: (context, playerState, child) {
+                  return SizedBox(
+                    height: playerState.isOpen ? 160 : 70,
+                    child: MusicPlayer(),
+                  );
+                })
+              ],
+            ),
+          )
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
