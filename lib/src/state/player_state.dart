@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class PlayerState with ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
   Duration _currentPosition = Duration.zero;
-  bool _isOpen = false;
+  bool isOpen = false;
   String? _currentUrl;
 
   bool get isPlaying => _audioPlayer.playing;
-  bool get isOpen => _isOpen;
+  bool get isOpenFlag => isOpen;
   Duration get currentPosition => _currentPosition;
   Duration get duration => _audioPlayer.duration ?? Duration.zero;
   String? get currentUrl => _currentUrl;
@@ -23,11 +26,30 @@ class PlayerState with ChangeNotifier {
   Future<void> play(String url) async {
     if (_currentUrl != url) {
       _currentUrl = url;
-      await _audioPlayer.setUrl(url);
+
+      // Tải xuống tệp
+      final filePath = await _downloadFile(url);
+
+      if (filePath != null) {
+        // Phát từ tệp cục bộ
+        await _audioPlayer.setAudioSource(AudioSource.file(filePath));
+        _audioPlayer.play();
+        isOpen = true;
+        notifyListeners();
+      }
     }
-    _audioPlayer.play();
-    _isOpen = true;
-    notifyListeners();
+  }
+
+  Future<String?> _downloadFile(String url) async {
+    try {
+      final directory = await getTemporaryDirectory();
+      final filePath = '${directory.path}/temp_audio.mp3';
+      await Dio().download(url, filePath);
+      return filePath;
+    } catch (e) {
+      print("Error downloading file: $e");
+      return null;
+    }
   }
 
   void pause() {
@@ -36,14 +58,19 @@ class PlayerState with ChangeNotifier {
   }
 
   void toggleOpen([bool? status]) {
-    _isOpen = status ?? !_isOpen;
+    isOpen = status ?? !isOpen;
     notifyListeners();
   }
 
   Future<void> seek(Duration position) async {
-    await _audioPlayer.seek(position);
+    try {
+      await _audioPlayer.seek(position);
+    } catch (e) {
+      print("Error in seek: $e");
+    }
   }
 
+  @override
   void dispose() {
     _audioPlayer.dispose();
     super.dispose();
